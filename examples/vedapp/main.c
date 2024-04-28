@@ -11,15 +11,13 @@
 
 bool running = true;
 static vedframe_t frame;
+int32_t total = 0;
+int32_t bad_frame = 0;
 
 static void intHandler(int dummy) 
 {
     running = false;
 }
-
-int32_t total = 0;
-int32_t bad_frame = 0;
-
 
 int main()
 {
@@ -33,7 +31,7 @@ int main()
     // Read byte by byte until EOF is reached
     while ((byte = getchar()) != EOF) 
     {
-        //printf("%c", (char)byte); // Print
+        //printf("%c", (char)byte); // Print the byte of data
 
         bool frameReady = VEDPARSE_process(byte);
 
@@ -58,8 +56,6 @@ int main()
             }
 
             printf("[Frame stats --> Bad: %d, Total %d]\n", bad_frame, total);
-
-            VEDPARSE_init();
         }
     }
 

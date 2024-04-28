@@ -26,13 +26,14 @@ const char* checksumTagName = "CHECKSUM";
 static VEDPARSE_data_t _internal;
 
 void doAddProperty(vedframe_t*, vedprop_t*);
-void doEndFrame(vedframe_t*, uint8_t, uint8_t);
-bool is_hex_char(char c);
+bool doIsHexChar(char c);
 
-bool is_hex_char(char c) {
-    return ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
-}
-
+/**
+ * @brief Add a property to the frame
+ * 
+ * @param pFrame Pointer to frame
+ * @param pProp Pointer to the property
+ */
 void doAddProperty(vedframe_t* pFrame, vedprop_t* pProp)
 {
     //printf("Key: %s, Value: %s\n", pProp->key, pProp->value);
@@ -47,17 +48,33 @@ void doAddProperty(vedframe_t* pFrame, vedprop_t* pProp)
     pFrame->property_count++;
 }
 
-void doEndFrame(vedframe_t* pFrame, uint8_t checksumReceived, uint8_t checksumCalc)
-{
-    pFrame->checksum_valid = (checksumReceived == checksumCalc);
+/**
+ * @brief Returns true if the character is a hexadecimal symbol
+ * 
+ * @param c 
+ * @return true 
+ * @return false 
+ */
+bool doIsHexChar(char c) {
+    return ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
 }
 
-void VEDPARSE_init()
+/**
+ * @brief Initialise the module by erasing the internal data structure
+ * 
+ */
+void VEDPARSE_init(void)
 {
     memset(&_internal, 0, sizeof(VEDPARSE_data_t)); // clear any history
 }
 
-
+/**
+ * @brief Process an incomming byte of data. Returns true once a frame is ready
+ * 
+ * @param inbyte 
+ * @return true 
+ * @return false 
+ */
 bool VEDPARSE_process(uint8_t inbyte)
 {
     bool frame_ready = false;
@@ -167,7 +184,7 @@ bool VEDPARSE_process(uint8_t inbyte)
         }
 
         case RECORD_HEX:
-        if (!is_hex_char(inbyte)) // TODO: check me
+        if (!doIsHexChar(inbyte)) // TODO: check me
         {
             _internal.checksum = 0;
             _internal.state = IDLE;
@@ -178,9 +195,27 @@ bool VEDPARSE_process(uint8_t inbyte)
     return frame_ready;
 }
 
-
+/**
+ * @brief Copy the current frame to the data structure via the supplied pointer
+ * 
+ * @param pFrame Pointer to frame
+ * @return int32_t 0 if no error
+ */
 int32_t VEDPARSE_get_frame(vedframe_t* pFrame)
 {
+    // copy the frame
     memcpy(pFrame, &_internal.frame, sizeof(vedframe_t));
+
+    // rest the module by erasing the internal data structure (including the frame)
+    VEDPARSE_reset();
     return 0;
+}
+
+/**
+ * @brief Reset the parser. Should be called after each frame
+ * 
+ */
+void VEDPARSE_reset(void)
+{
+    VEDPARSE_init();
 }
