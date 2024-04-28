@@ -1,14 +1,15 @@
 CC = gcc
 CFLAGS = -Wall
 
-PROJECT_DIR = ./
+APP_DIR = ./
+LIB_DIR = ../../source
 
-SRCS = $(wildcard *.c) $(wildcard $(PROJECT_DIR)/*.c)
+SRCS = $(wildcard *.c) $(wildcard $(APP_DIR)/*.c) $(wildcard $(LIB_DIR)/*.c)
 OBJS = $(SRCS:.c=.o)
 
-TARGET = vedparse
+TARGET = vedapp
 
-INC_DIRS = -I$(PROJECT_DIR)
+INC_DIRS = -I$(APP_DIR) -I$(LIB_DIR)
 
 all: $(TARGET)
 
